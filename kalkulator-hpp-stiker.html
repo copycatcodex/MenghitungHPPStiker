@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator HPP Stiker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F2ED;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE8;
+    --border: #E2DDD7;
+    --text: #1A1714;
+    --text-muted: #7A736A;
+    --text-hint: #B0A89E;
+    --accent: #D4651A;
+    --accent-light: #FDF0E8;
+    --accent-dark: #A34E12;
+    --success: #2D7A4F;
+    --success-light: #EAF5EF;
+    --info: #1A5FA3;
+    --info-light: #E8F0FB;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container { max-width: 720px; margin: 0 auto; }
+
+  header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 18px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--surface2);
+    padding: 4px;
+    border-radius: var(--radius);
+    margin-bottom: 1.5rem;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 9px 12px;
+    border: none;
+    background: transparent;
+    border-radius: calc(var(--radius) - 4px);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+
+  .tab.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 1rem;
+  }
+
+  .field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .field label {
+    font-size: 14px;
+    color: var(--text-muted);
+    min-width: 190px;
+    flex-shrink: 0;
+  }
+
+  .field input[type="number"],
+  .field input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field input:focus {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .field .prefix {
+    font-size: 13px;
+    color: var(--text-hint);
+    font-family: 'DM Mono', monospace;
+    white-space: nowrap;
+  }
+
+  .input-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .input-wrap:focus-within {
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+
+  .input-wrap span {
+    padding: 8px 10px 8px 12px;
+    font-size: 13px;
+    color: var(--text-hint);
+    font-family: 'DM Mono', monospace;
+    border-right: 1px solid var(--border);
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+
+  .input-wrap input {
+    border: none !important;
+    background: transparent !important;
+    padding: 8px 12px !important;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1rem 0;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    .results-grid { grid-template-columns: 1fr; }
+    .field { flex-direction: column; align-items: flex-start; gap: 6px; }
+    .field label { min-width: unset; }
+    .field .input-wrap, .field input { width: 100%; }
+  }
+
+  .metric {
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+  }
+
+  .metric.accent { background: var(--accent-light); }
+  .metric.success { background: var(--success-light); }
+
+  .metric .m-label {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-bottom: 4px;
+  }
+
+  .metric.accent .m-label { color: var(--accent); }
+  .metric.success .m-label { color: var(--success); }
+
+  .metric .m-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .metric.accent .m-value { color: var(--accent-dark); }
+  .metric.success .m-value { color: var(--success); }
+
+  .metric .m-sub {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 2px;
+  }
+
+  .margin-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .margin-row label {
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  input[type="range"] {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+  }
+
+  .margin-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 42px;
+    text-align: right;
+  }
+
+  /* Luas panel */
+  .size-header {
+    display: grid;
+    grid-template-columns: 90px 90px 70px 1fr auto;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .size-header span {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+  }
+
+  .size-row {
+    display: grid;
+    grid-template-columns: 90px 90px 70px 1fr auto;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  .size-row input[type="number"],
+  .size-row input[type="text"] {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+
+  .size-row input:focus { border-color: var(--accent); background: var(--surface); }
+
+  .size-row .name-input {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .remove-btn {
+    width: 28px; height: 28px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface2);
+    color: var(--text-hint);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .remove-btn:hover { background: #FDEDED; border-color: #E2A0A0; color: #C03030; }
+
+  .add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px dashed var(--accent);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: all 0.15s;
+  }
+
+  .add-btn:hover { background: var(--accent-light); }
+
+  .result-list { margin-top: 1rem; }
+
+  .result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .result-item:last-child { border-bottom: none; }
+
+  .result-item .ri-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .result-item .ri-detail {
+    font-size: 12px;
+    color: var(--text-hint);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .result-item .ri-right { text-align: right; }
+
+  .result-item .ri-hpp {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--accent-dark);
+  }
+
+  .result-item .ri-jual {
+    font-size: 12px;
+    color: var(--success);
+    font-family: 'DM Mono', monospace;
+    margin-top: 2px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 1.5rem;
+    color: var(--text-hint);
+    font-size: 14px;
+  }
+
+  .totals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 1rem;
+  }
+
+  .rumus-box {
+    background: var(--info-light);
+    border: 1px solid #C5D8F5;
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    margin-top: 1rem;
+  }
+
+  .rumus-box .r-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--info);
+    margin-bottom: 6px;
+  }
+
+  .rumus-box .r-formula {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--info);
+    line-height: 1.7;
+  }
+
+  footer {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-hint);
+  }
+
+  @media (max-width: 560px) {
+    .size-header { grid-template-columns: 70px 70px 60px 1fr auto; }
+    .size-row { grid-template-columns: 70px 70px 60px 1fr auto; }
+  }
+
+  @media (max-width: 420px) {
+    .size-header { display: none; }
+    .size-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .size-row .name-col { grid-column: 1 / -1; }
+    .size-row .remove-col { grid-row: 1; grid-column: 2; justify-self: end; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <header>
+    <div class="logo-row">
+      <div class="logo-icon">🏷️</div>
+      <h1>Kalkulator HPP Stiker</h1>
+    </div>
+    <p class="subtitle">Hitung harga pokok penjualan stiker dengan mudah & akurat</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('simple', this)">HPP Sederhana</button>
+    <button class="tab" onclick="switchTab('luas', this)">HPP Berdasarkan Luas</button>
+  </div>
+
+  <!-- PANEL SEDERHANA -->
+  <div id="panel-simple" class="panel active">
+
+    <div class="card">
+      <p class="card-title">Biaya Produksi</p>
+      <div class="field">
+        <label>Total biaya cetak</label>
+        <div class="input-wrap">
+          <span>Rp</span>
+          <input type="number" id="s-biaya" value="28000" min="0" oninput="calcSimple()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Jumlah stiker</label>
+        <div class="input-wrap">
+          <span>pcs</span>
+          <input type="number" id="s-pcs" value="20" min="1" oninput="calcSimple()">
+        </div>
+      </div>
+      <hr class="divider">
+      <p class="card-title">Biaya Tambahan (opsional)</p>
+      <div class="field">
+        <label>Biaya desain</label>
+        <div class="input-wrap">
+          <span>Rp</span>
+          <input type="number" id="s-desain" value="0" min="0" oninput="calcSimple()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Ongkir dari vendor</label>
+        <div class="input-wrap">
+          <span>Rp</span>
+          <input type="number" id="s-ongkir" value="0" min="0" oninput="calcSimple()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Packaging per pcs</label>
+        <div class="input-wrap">
+          <span>Rp</span>
+          <input type="number" id="s-pack" value="0" min="0" oninput="calcSimple()">
+        </div>
+      </div>
+      <div class="field">
+        <label>Operasional per pcs</label>
+        <div class="input-wrap">
+          <span>Rp</span>
+          <input type="number" id="s-ops" value="0" min="0" oninput="calcSimple()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Target Margin Keuntungan</p>
+      <div class="margin-row">
+        <label>Margin</label>
+        <input type="range" id="s-margin" min="10" max="400" step="10" value="150" oninput="calcSimple()">
+        <span class="margin-val" id="s-margin-label">150%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Hasil Perhitungan</p>
+      <div class="rumus-box">
+        <div class="r-title">Rumus HPP</div>
+        <div class="r-formula">HPP/pcs = (Biaya cetak + Desain + Ongkir) ÷ Jumlah pcs<br>+ Packaging + Operasional</div>
+      </div>
+      <div class="results-grid">
+        <div class="metric accent">
+          <div class="m-label">HPP per pcs</div>
+          <div class="m-value" id="s-hpp">Rp 1.400</div>
+          <div class="m-sub">harga pokok</div>
+        </div>
+        <div class="metric success">
+          <div class="m-label">Saran harga jual</div>
+          <div class="m-value" id="s-jual">Rp 3.500</div>
+          <div class="m-sub">dengan margin <span id="s-margin-badge">150%</span></div>
+        </div>
+        <div class="metric">
+          <div class="m-label">Untung per pcs</div>
+          <div class="m-value" id="s-untung">Rp 2.100</div>
+          <div class="m-sub">setelah HPP</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">Total untung (semua pcs)</div>
+          <div class="m-value" id="s-total">Rp 42.000</div>
+          <div class="m-sub">jika semua terjual</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PANEL LUAS -->
+  <div id="panel-luas" class="panel">
+
+    <div class="card">
+      <p class="card-title">Biaya Produksi</p>
+      <div class="field">
+        <label>Total biaya cetak</label>
+        <div class="input-wrap">
+          <span>Rp</span>
+          <input type="number" id="l-biaya" value="28000" min="0" oninput="calcLuas()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Daftar Ukuran Stiker</p>
+      <div class="size-header">
+        <span>Lebar (cm)</span>
+        <span>Tinggi (cm)</span>
+        <span>Jumlah</span>
+        <span>Nama</span>
+        <span></span>
+      </div>
+      <div id="size-rows"></div>
+      <button class="add-btn" onclick="addRow()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        Tambah ukuran
+      </button>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Hasil HPP per Ukuran</p>
+      <div class="rumus-box">
+        <div class="r-title">Rumus HPP Proporsional</div>
+        <div class="r-formula">HPP/pcs = (Luas stiker ÷ Total luas semua stiker) × Total biaya ÷ Jumlah pcs</div>
+      </div>
+      <div class="result-list" id="l-result-list">
+        <div class="empty-state">Isi data ukuran stiker di atas</div>
+      </div>
+      <hr class="divider">
+      <div class="totals-grid">
+        <div class="metric">
+          <div class="m-label">Total luas</div>
+          <div class="m-value" id="l-totluas">—</div>
+          <div class="m-sub">cm² semua stiker</div>
+        </div>
+        <div class="metric">
+          <div class="m-label">Total pcs</div>
+          <div class="m-value" id="l-totpcs">—</div>
+          <div class="m-sub">semua ukuran</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    Kalkulator HPP Stiker &mdash; dibuat untuk membantu menentukan harga jual yang tepat 🏷️
+  </footer>
+
+</div>
+
+<script>
+  function switchTab(id, el) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('panel-' + id).classList.add('active');
+  }
+
+  function fmt(n) {
+    return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  }
+
+  function calcSimple() {
+    const biaya   = parseFloat(document.getElementById('s-biaya').value)  || 0;
+    const pcs     = parseFloat(document.getElementById('s-pcs').value)    || 1;
+    const desain  = parseFloat(document.getElementById('s-desain').value) || 0;
+    const ongkir  = parseFloat(document.getElementById('s-ongkir').value) || 0;
+    const pack    = parseFloat(document.getElementById('s-pack').value)   || 0;
+    const ops     = parseFloat(document.getElementById('s-ops').value)    || 0;
+    const margin  = parseFloat(document.getElementById('s-margin').value) || 100;
+
+    document.getElementById('s-margin-label').textContent = margin + '%';
+    document.getElementById('s-margin-badge').textContent = margin + '%';
+
+    const hpp    = (biaya / pcs) + (desain / pcs) + (ongkir / pcs) + pack + ops;
+    const jual   = hpp * (1 + margin / 100);
+    const untung = jual - hpp;
+    const total  = untung * pcs;
+
+    document.getElementById('s-hpp').textContent    = fmt(hpp);
+    document.getElementById('s-jual').textContent   = fmt(jual);
+    document.getElementById('s-untung').textContent = fmt(untung);
+    document.getElementById('s-total').textContent  = fmt(total);
+  }
+
+  // ---- LUAS ----
+  let rows = [
+    { w: 6,  h: 6,  qty: 15, name: 'Stiker kecil' },
+    { w: 10, h: 10, qty: 3,  name: 'Stiker besar'  }
+  ];
+
+  function renderRows() {
+    const cont = document.getElementById('size-rows');
+    cont.innerHTML = '';
+    rows.forEach((r, i) => {
+      const div = document.createElement('div');
+      div.className = 'size-row';
+      div.innerHTML = `
+        <input type="number" value="${r.w}" min="0.1" step="0.1" placeholder="lebar" oninput="rows[${i}].w=parseFloat(this.value)||0;calcLuas()">
+        <input type="number" value="${r.h}" min="0.1" step="0.1" placeholder="tinggi" oninput="rows[${i}].h=parseFloat(this.value)||0;calcLuas()">
+        <input type="number" value="${r.qty}" min="1" step="1" placeholder="qty" oninput="rows[${i}].qty=parseInt(this.value)||1;calcLuas()">
+        <input type="text" class="name-input" value="${r.name}" placeholder="nama stiker" oninput="rows[${i}].name=this.value;calcLuas()">
+        ${rows.length > 1
+          ? `<button class="remove-btn" onclick="removeRow(${i})" title="Hapus">×</button>`
+          : '<div style="width:28px"></div>'
+        }
+      `;
+      cont.appendChild(div);
+    });
+    calcLuas();
+  }
+
+  function addRow() {
+    rows.push({ w: 6, h: 6, qty: 1, name: '' });
+    renderRows();
+  }
+
+  function removeRow(i) {
+    rows.splice(i, 1);
+    renderRows();
+  }
+
+  function calcLuas() {
+    const biaya = parseFloat(document.getElementById('l-biaya').value) || 0;
+    let totalLuas = 0;
+    let totalPcs  = 0;
+
+    rows.forEach(r => {
+      if (r.w && r.h && r.qty) {
+        totalLuas += r.w * r.h * r.qty;
+        totalPcs  += r.qty;
+      }
+    });
+
+    const listEl = document.getElementById('l-result-list');
+
+    if (totalLuas === 0) {
+      listEl.innerHTML = '<div class="empty-state">Isi data ukuran stiker di atas</div>';
+      document.getElementById('l-totluas').textContent = '—';
+      document.getElementById('l-totpcs').textContent  = '—';
+      return;
+    }
+
+    document.getElementById('l-totluas').textContent = totalLuas.toFixed(1) + ' cm²';
+    document.getElementById('l-totpcs').textContent  = totalPcs + ' pcs';
+
+    let html = '';
+    rows.forEach(r => {
+      if (!r.w || !r.h || !r.qty) return;
+      const luas       = r.w * r.h;
+      const luasTotal  = luas * r.qty;
+      const hppPerPcs  = (luasTotal / totalLuas) * biaya / r.qty;
+      const saranJual  = hppPerPcs * 2.5;
+      const label      = r.name || `${r.w}×${r.h} cm`;
+
+      html += `
+        <div class="result-item">
+          <div>
+            <div class="ri-name">${label}</div>
+            <div class="ri-detail">${r.w}×${r.h} cm · ${r.qty} pcs · luas ${luas} cm²/pcs</div>
+          </div>
+          <div class="ri-right">
+            <div class="ri-hpp">${fmt(hppPerPcs)}<span style="font-weight:400;font-size:12px;color:var(--text-hint);">/pcs</span></div>
+            <div class="ri-jual">jual ≈ ${fmt(saranJual)}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+  }
+
+  calcSimple();
+  renderRows();
+</script>
+</body>
+</html>
