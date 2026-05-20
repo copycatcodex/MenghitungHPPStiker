@@ -615,6 +615,15 @@
     </div>
 
     <div class="card">
+      <p class="card-title">Target Margin Keuntungan</p>
+      <div class="margin-row">
+        <label>Margin</label>
+        <input type="range" id="l-margin" min="10" max="400" step="10" value="150" oninput="calcLuas()">
+        <span class="margin-val" id="l-margin-label">150%</span>
+      </div>
+    </div>
+
+    <div class="card">
       <p class="card-title">Hasil HPP per Ukuran</p>
       <div class="rumus-box">
         <div class="r-title">Rumus HPP Proporsional</div>
@@ -719,7 +728,11 @@
   }
 
   function calcLuas() {
-    const biaya = parseFloat(document.getElementById('l-biaya').value) || 0;
+    const biaya  = parseFloat(document.getElementById('l-biaya').value)  || 0;
+    const margin = parseFloat(document.getElementById('l-margin').value) || 150;
+
+    document.getElementById('l-margin-label').textContent = margin + '%';
+
     let totalLuas = 0;
     let totalPcs  = 0;
 
@@ -745,11 +758,12 @@
     let html = '';
     rows.forEach(r => {
       if (!r.w || !r.h || !r.qty) return;
-      const luas       = r.w * r.h;
-      const luasTotal  = luas * r.qty;
-      const hppPerPcs  = (luasTotal / totalLuas) * biaya / r.qty;
-      const saranJual  = hppPerPcs * 2.5;
-      const label      = r.name || `${r.w}×${r.h} cm`;
+      const luas      = r.w * r.h;
+      const luasTotal = luas * r.qty;
+      const hppPerPcs = (luasTotal / totalLuas) * biaya / r.qty;
+      const saranJual = hppPerPcs * (1 + margin / 100);
+      const untung    = saranJual - hppPerPcs;
+      const label     = r.name || `${r.w}×${r.h} cm`;
 
       html += `
         <div class="result-item">
@@ -758,8 +772,8 @@
             <div class="ri-detail">${r.w}×${r.h} cm · ${r.qty} pcs · luas ${luas} cm²/pcs</div>
           </div>
           <div class="ri-right">
-            <div class="ri-hpp">${fmt(hppPerPcs)}<span style="font-weight:400;font-size:12px;color:var(--text-hint);">/pcs</span></div>
-            <div class="ri-jual">jual ≈ ${fmt(saranJual)}</div>
+            <div class="ri-hpp">${fmt(hppPerPcs)}<span style="font-weight:400;font-size:12px;color:var(--text-hint);">/pcs HPP</span></div>
+            <div class="ri-jual">jual ≈ ${fmt(saranJual)} · untung ${fmt(untung)}</div>
           </div>
         </div>
       `;
