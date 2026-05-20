@@ -210,6 +210,104 @@
     margin-top: 1rem;
   }
 
+  .extra-header {
+    display: grid;
+    grid-template-columns: 1fr 120px 130px 28px;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 0 2px;
+  }
+
+  .extra-header span {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+  }
+
+  .extra-row {
+    display: grid;
+    grid-template-columns: 1fr 120px 130px 28px;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  .extra-row input[type="number"],
+  .extra-row input[type="text"] {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+
+  .extra-row input:focus { border-color: var(--accent); background: var(--surface); }
+
+  .extra-row select {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+
+  .extra-row select:focus { border-color: var(--accent); }
+
+  .extra-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  .extra-input-wrap:focus-within { border-color: var(--accent); background: var(--surface); }
+
+  .extra-input-wrap span {
+    padding: 8px 8px 8px 10px;
+    font-size: 12px;
+    color: var(--text-hint);
+    font-family: 'DM Mono', monospace;
+    border-right: 1px solid var(--border);
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+
+  .extra-input-wrap input {
+    border: none !important;
+    background: transparent !important;
+    padding: 8px 8px !important;
+    flex: 1;
+    min-width: 0;
+    font-family: 'DM Mono', monospace !important;
+  }
+
+  @media (max-width: 600px) {
+    .extra-header { grid-template-columns: 1fr 100px 110px 28px; }
+    .extra-row { grid-template-columns: 1fr 100px 110px 28px; }
+  }
+
+  @media (max-width: 480px) {
+    .extra-header { display: none; }
+    .extra-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .extra-row .extra-input-wrap { grid-column: 1 / -1; }
+  }
+
   @media (max-width: 480px) {
     .results-grid { grid-template-columns: 1fr; }
     .field { flex-direction: column; align-items: flex-start; gap: 6px; }
@@ -513,34 +611,17 @@
       </div>
       <hr class="divider">
       <p class="card-title">Biaya Tambahan (opsional)</p>
-      <div class="field">
-        <label>Biaya desain</label>
-        <div class="input-wrap">
-          <span>Rp</span>
-          <input type="number" id="s-desain" value="0" min="0" oninput="calcSimple()">
-        </div>
+      <div class="extra-header">
+        <span>Nama biaya</span>
+        <span>Jenis</span>
+        <span>Jumlah (Rp)</span>
+        <span></span>
       </div>
-      <div class="field">
-        <label>Ongkir dari vendor</label>
-        <div class="input-wrap">
-          <span>Rp</span>
-          <input type="number" id="s-ongkir" value="0" min="0" oninput="calcSimple()">
-        </div>
-      </div>
-      <div class="field">
-        <label>Packaging per pcs</label>
-        <div class="input-wrap">
-          <span>Rp</span>
-          <input type="number" id="s-pack" value="0" min="0" oninput="calcSimple()">
-        </div>
-      </div>
-      <div class="field">
-        <label>Operasional per pcs</label>
-        <div class="input-wrap">
-          <span>Rp</span>
-          <input type="number" id="s-ops" value="0" min="0" oninput="calcSimple()">
-        </div>
-      </div>
+      <div id="extra-rows"></div>
+      <button class="add-btn" onclick="addExtra()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="7" y1="2" x2="7" y2="12"/><line x1="2" y1="7" x2="12" y2="7"/></svg>
+        Tambah biaya
+      </button>
     </div>
 
     <div class="card">
@@ -556,7 +637,7 @@
       <p class="card-title">Hasil Perhitungan</p>
       <div class="rumus-box">
         <div class="r-title">Rumus HPP</div>
-        <div class="r-formula">HPP/pcs = (Biaya cetak + Desain + Ongkir) ÷ Jumlah pcs<br>+ Packaging + Operasional</div>
+        <div class="r-formula">HPP/pcs = (Biaya produksi + Total biaya dibagi pcs) ÷ Jumlah pcs<br>+ Total biaya per pcs</div>
       </div>
       <div class="results-grid">
         <div class="metric accent">
@@ -667,19 +748,65 @@
     return 'Rp ' + Math.round(n).toLocaleString('id-ID');
   }
 
+  // ---- BIAYA TAMBAHAN DINAMIS ----
+  let extras = [
+    { name: 'Biaya desain', type: 'total', amount: 0 },
+    { name: 'Ongkir dari vendor', type: 'total', amount: 0 },
+    { name: 'Packaging', type: 'per_pcs', amount: 0 },
+  ];
+
+  function renderExtras() {
+    const cont = document.getElementById('extra-rows');
+    cont.innerHTML = '';
+    extras.forEach((e, i) => {
+      const div = document.createElement('div');
+      div.className = 'extra-row';
+      div.innerHTML = `
+        <input type="text" class="name-input" value="${e.name}" placeholder="nama biaya" oninput="extras[${i}].name=this.value">
+        <select onchange="extras[${i}].type=this.value;calcSimple()">
+          <option value="total" ${e.type==='total'?'selected':''}>Dibagi pcs</option>
+          <option value="per_pcs" ${e.type==='per_pcs'?'selected':''}>Per pcs</option>
+        </select>
+        <div class="extra-input-wrap">
+          <span>Rp</span>
+          <input type="number" value="${e.amount}" min="0" placeholder="0" oninput="extras[${i}].amount=parseFloat(this.value)||0;calcSimple()">
+        </div>
+        ${extras.length > 1
+          ? `<button class="remove-btn" onclick="removeExtra(${i})" title="Hapus">×</button>`
+          : '<div style="width:28px"></div>'
+        }
+      `;
+      cont.appendChild(div);
+    });
+    calcSimple();
+  }
+
+  function addExtra() {
+    extras.push({ name: '', type: 'total', amount: 0 });
+    renderExtras();
+  }
+
+  function removeExtra(i) {
+    extras.splice(i, 1);
+    renderExtras();
+  }
+
   function calcSimple() {
-    const biaya   = parseFloat(document.getElementById('s-biaya').value)  || 0;
-    const pcs     = parseFloat(document.getElementById('s-pcs').value)    || 1;
-    const desain  = parseFloat(document.getElementById('s-desain').value) || 0;
-    const ongkir  = parseFloat(document.getElementById('s-ongkir').value) || 0;
-    const pack    = parseFloat(document.getElementById('s-pack').value)   || 0;
-    const ops     = parseFloat(document.getElementById('s-ops').value)    || 0;
-    const margin  = parseFloat(document.getElementById('s-margin').value) || 100;
+    const biaya  = parseFloat(document.getElementById('s-biaya').value) || 0;
+    const pcs    = parseFloat(document.getElementById('s-pcs').value)   || 1;
+    const margin = parseFloat(document.getElementById('s-margin').value) || 100;
 
     document.getElementById('s-margin-label').textContent = margin + '%';
     document.getElementById('s-margin-badge').textContent = margin + '%';
 
-    const hpp    = (biaya / pcs) + (desain / pcs) + (ongkir / pcs) + pack + ops;
+    let extraTotal = 0;
+    let extraPerPcs = 0;
+    extras.forEach(e => {
+      if (e.type === 'total') extraTotal += e.amount;
+      else extraPerPcs += e.amount;
+    });
+
+    const hpp    = (biaya / pcs) + (extraTotal / pcs) + extraPerPcs;
     const jual   = hpp * (1 + margin / 100);
     const untung = jual - hpp;
     const total  = untung * pcs;
@@ -782,7 +909,7 @@
     listEl.innerHTML = html;
   }
 
-  calcSimple();
+  renderExtras();
   renderRows();
 </script>
 </body>
